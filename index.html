@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MLBB Account Checker</title>
+    <link rel="stylesheet" href="public/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo-container">
+                <i class="fas fa-gamepad logo-icon"></i>
+                <h1 class="title">MLBB Account Checker</h1>
+            </div>
+            <p class="subtitle">Mobile Legends: Bang Bang Account Verification Tool</p>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Stats Cards -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-label">Total Checked</span>
+                        <span class="stat-value" id="totalChecked">0</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-label">Valid</span>
+                        <span class="stat-value" id="validCount">0</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-times-circle"></i>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-label">Invalid</span>
+                        <span class="stat-value" id="invalidCount">0</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-label">Processing</span>
+                        <span class="stat-value" id="processingCount">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Input Section -->
+            <div class="input-section">
+                <div class="input-tabs">
+                    <button class="tab-btn active" data-tab="file">File Upload</button>
+                    <button class="tab-btn" data-tab="manual">Manual Input</button>
+                    <button class="tab-btn" data-tab="proxy">Proxy Settings</button>
+                </div>
+
+                <!-- File Upload Tab -->
+                <div class="tab-content active" id="file-tab">
+                    <div class="upload-area" id="dropArea">
+                        <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                        <h3>Upload Combo File</h3>
+                        <p>Drag & drop or click to browse</p>
+                        <p class="file-format">Supported format: .txt (email:password)</p>
+                        <input type="file" id="fileInput" accept=".txt" hidden>
+                        <button class="browse-btn" onclick="document.getElementById('fileInput').click()">
+                            <i class="fas fa-folder-open"></i> Browse Files
+                        </button>
+                    </div>
+                    <div class="file-info" id="fileInfo" style="display: none;">
+                        <i class="fas fa-file-alt"></i>
+                        <span id="fileName"></span>
+                        <span id="fileSize"></span>
+                        <button class="remove-file" onclick="removeFile()"><i class="fas fa-times"></i></button>
+                    </div>
+                </div>
+
+                <!-- Manual Input Tab -->
+                <div class="tab-content" id="manual-tab">
+                    <div class="manual-input">
+                        <textarea id="manualAccounts" placeholder="Enter accounts (one per line)&#10;Format: email:password&#10;Example: user@example.com:password123"></textarea>
+                        <div class="input-actions">
+                            <button class="action-btn" onclick="clearManual()">
+                                <i class="fas fa-eraser"></i> Clear
+                            </button>
+                            <span class="line-count" id="lineCount">0 lines</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Proxy Settings Tab -->
+                <div class="tab-content" id="proxy-tab">
+                    <div class="proxy-settings">
+                        <div class="proxy-type">
+                            <label>
+                                <input type="radio" name="proxyType" value="none" checked> No Proxy
+                            </label>
+                            <label>
+                                <input type="radio" name="proxyType" value="http"> HTTP
+                            </label>
+                            <label>
+                                <input type="radio" name="proxyType" value="socks4"> SOCKS4
+                            </label>
+                            <label>
+                                <input type="radio" name="proxyType" value="socks5"> SOCKS5
+                            </label>
+                        </div>
+                        <textarea id="proxyList" placeholder="Enter proxies (one per line)&#10;Format: ip:port or user:pass@ip:port" disabled></textarea>
+                        <div class="proxy-info">
+                            <i class="fas fa-info-circle"></i>
+                            <span>Using proxies can help avoid rate limiting</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Controls -->
+            <div class="controls">
+                <div class="thread-control">
+                    <label>Threads:</label>
+                    <input type="number" id="threads" min="1" max="20" value="5">
+                </div>
+                <div class="delay-control">
+                    <label>Delay (ms):</label>
+                    <input type="number" id="delay" min="100" max="5000" value="1000" step="100">
+                </div>
+                <button class="start-btn" id="startBtn">
+                    <i class="fas fa-play"></i> Start Checking
+                </button>
+                <button class="stop-btn" id="stopBtn" disabled>
+                    <i class="fas fa-stop"></i> Stop
+                </button>
+                <button class="export-btn" id="exportBtn" disabled>
+                    <i class="fas fa-download"></i> Export Results
+                </button>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="progress-container">
+                <div class="progress-bar" id="progressBar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div class="progress-info">
+                    <span id="progressText">0/0 accounts</span>
+                    <span id="progressPercentage">0%</span>
+                </div>
+            </div>
+
+            <!-- Results Table -->
+            <div class="results-section">
+                <div class="results-header">
+                    <h3><i class="fas fa-list"></i> Results</h3>
+                    <div class="results-filter">
+                        <button class="filter-btn active" data-filter="all">All</button>
+                        <button class="filter-btn" data-filter="valid">Valid</button>
+                        <button class="filter-btn" data-filter="invalid">Invalid</button>
+                    </div>
+                </div>
+                <div class="table-container">
+                    <table class="results-table" id="resultsTable">
+                        <thead>
+                            <tr>
+                                <th>No</th>
+                                <th>Email</th>
+                                <th>Password</th>
+                                <th>Status</th>
+                                <th>Response Time</th>
+                                <th>Details</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                            <tr class="empty-state">
+                                <td colspan="6">
+                                    <i class="fas fa-inbox"></i>
+                                    <p>No results yet. Start checking to see results.</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>© 2024 MLBB Checker. For educational purposes only.</p>
+            <p class="disclaimer">This tool is not affiliated with Moonton or Mobile Legends.</p>
+        </footer>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script src="public/js/main.js"></script>
+</body>
+</html>
